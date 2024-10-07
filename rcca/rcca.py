@@ -63,6 +63,19 @@ class _CCABase(object):
         if len(data) == 2:
             self.cancorrs = self.cancorrs[np.nonzero(self.cancorrs)]
         return self
+    
+    def get_images(self, data):
+        if not hasattr(self, "ws"):
+            raise NameError("Algorithm has not been trained.")
+        data = [np.nan_to_num(_zscore(d)) for d in data]
+        return [np.dot(d, w) for d, w in zip(data, self.ws)]
+
+    def get_image_correlations(self, data):
+        if len(data) != 2:
+            raise NotImplementedError("This method is only implemented for 2 datasets.")
+        images = self.get_images(data)
+        return [np.corrcoef(images[0][:,i], images[1][:,i])[0,1]
+                for i in range(self.numCC)]
 
     def validate(self, vdata):
         vdata = [np.nan_to_num(_zscore(d)) for d in vdata]
